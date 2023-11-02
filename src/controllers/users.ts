@@ -3,12 +3,44 @@ import { sql } from "../database/postgres";
 export const getProfile = async (userId: string) => {
 	try {
 		const response = await sql`
-			SELECT * FROM profiles
+			SELECT 
+				users.id,
+				profiles.sector_id,
+				profiles.nickname,
+				sectors.name as sector
+			FROM users
+			LEFT JOIN profiles ON users.id = profiles.user_id
+			LEFT JOIN sectors ON profiles.sector_id = sectors.id
 			WHERE user_id = ${userId}
-      `;
+      	`;
+		const servicesCompanies = await sql`
+			SELECT companies.id, companies.name
+			FROM users_roles_companies
+			LEFT JOIN companies ON users_roles_companies.company_id = companies.id
+			LEFT JOIN roles ON users_roles_companies.role_id = roles.id
+			WHERE users_roles_companies.user_id = ${userId}
+			AND roles.name != 'Owner'
+		`;
+		const ownerCopmanies = await sql`
+			SELECT companies.id, companies.name
+			FROM users_roles_companies
+			LEFT JOIN companies ON users_roles_companies.company_id = companies.id
+			LEFT JOIN roles ON users_roles_companies.role_id = roles.id
+			WHERE users_roles_companies.user_id = ${userId}
+			AND roles.name = 'Owner'
+		`;
 		if (response.length === 0)
 			return { success: true, message: "Profile not found", data: null };
-		return { success: true, message: "Profile found", data: response[0] };
+		else
+			return {
+				success: true,
+				message: "Profile found",
+				data: {
+					...response[0],
+					servicesCompanies,
+					ownerCopmanies,
+				},
+			};
 	} catch (error) {
 		console.log(error);
 		throw new Error("getProfile Error");
