@@ -10,3 +10,6 @@ server.listen(PORT ?? 5000, () => {
 
 import authRouter from "./routes/auth";
 server.use("/auth", authRouter);
+
+import users from "./routes/users";
+server.use("/users", users);

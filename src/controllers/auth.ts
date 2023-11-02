@@ -1,7 +1,6 @@
 import { sql } from "../database/postgres";
 import bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from 'uuid';
 
 export const signUp = async (email: string, password: string) => {
 	try {
@@ -14,10 +13,9 @@ export const signUp = async (email: string, password: string) => {
 			};
 		const { SALT, JWT_KEY } = process.env;
 		const hash = bcrypt.hashSync(password, Number(SALT));
-		const id = uuidv4();
 		const response = await sql`
-			INSERT INTO users (id, email, password) 
-			VALUES (${id}, ${email}, ${hash}) 
+			INSERT INTO users (email, password) 
+			VALUES (${email}, ${hash}) 
 			RETURNING id
         `;
 		const token = jwt.sign({ id: response[0].id }, `${JWT_KEY}`, { expiresIn: "7d" });
@@ -35,9 +33,9 @@ export const signUp = async (email: string, password: string) => {
 export const verifyToken = async (token: string) => {
 	try {
 		const { JWT_KEY } = process.env;
-		const decoded = jwt.verify(token, `${JWT_KEY}`);
-		if (!decoded) return { success: false, message: "Invalid token" };
-		return { success: true, message: "Valid token" };
+		const decoded: any = jwt.verify(token, `${JWT_KEY}`);
+		if (!decoded) return { success: false, message: "Invalid token", userId: null };
+		return { success: true, message: "Valid token", userId: decoded.id };
 	} catch (error) {
 		console.log(error);
 		throw new Error("VerifyToken Error");

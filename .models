@@ -1,0 +1,30 @@
+// ROUTES
+// import {  } from "";
+// import { Router } from "express";
+// const router = Router();
+// export default router;
+// router.("/", async (req, res) => {
+// 	try {
+// 		const {  } = req.;
+// 		const {  } = await ();
+// 		if () return res.status(200).send();
+// 	} catch (error) {
+// 		console.log(error);
+// 		return res.status(500).send("Internal Server Error");
+// 	}
+// });
+
+// Controllers
+// export const  = async () => {
+// 	try {
+// 		const  = await sql`
+//         `;
+// 		return {
+// 			success: ,
+// 			message: ""
+// 		};
+// 	} catch (error) {
+// 		console.log(error);
+// 		throw new Error(" Error");
+// 	}
+// };
