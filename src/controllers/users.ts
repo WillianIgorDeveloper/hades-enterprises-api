@@ -30,13 +30,35 @@ export const getSectors = async () => {
 export const createProfile = async (
 	userId: string,
 	sectorId: string,
-	nickname: string
+	nickname: string,
+	companyName: string | null
 ) => {
 	try {
+		const hasProfile = await sql`
+			SELECT * FROM profiles
+			WHERE user_id = ${userId}
+		`;
+		if (hasProfile.length > 0)
+			return { success: false, message: "Profile already exists" };
 		await sql`
 			INSERT INTO profiles (user_id, sector_id, nickname)
 			VALUES (${userId}, ${sectorId}, ${nickname})
 		`;
+		if (companyName) {
+			const [company] = await sql`
+				INSERT INTO companies (name)
+				VALUES (${companyName})
+				returning id
+			`;
+			const [role] = await sql`
+				SELECT id FROM roles
+				WHERE name = 'Owner' 
+			`;
+			await sql`
+				INSERT INTO users_roles_companies (user_id, role_id, company_id)
+				VALUES (${userId}, ${role.id}, ${company.id})
+			`;
+		}
 		return { success: true, message: "Profile created" };
 	} catch (error) {
 		console.log(error);

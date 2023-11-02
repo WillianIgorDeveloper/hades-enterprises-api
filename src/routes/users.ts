@@ -39,14 +39,15 @@ router.get("/sectors", async (req, res) => {
 	}
 });
 
-router.post("/newProfile", async (req, res) => {
+router.post("/createProfile", async (req, res) => {
 	try {
-		const { sectorId, nickname } = req.body;
+		const { nickname, sectorId, companyName } = req.body;
 		if (!sectorId || !nickname) return res.status(400).send("Missing fields");
 		const { success, message } = await createProfile(
 			(req as any).userId,
 			sectorId,
-			nickname
+			nickname,
+			companyName
 		);
 		return res.status(200).send({ success, message });
 	} catch (error) {
